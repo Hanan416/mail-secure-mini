@@ -25,9 +25,8 @@ def sendmail(protocol, subject, body, sender, receiver):
     print("setting msg filedata: ", file_data)
     print("setting msg file subtype: ", file_subtype)
 
-    #msg.add_attachment(file_data, maintype='image', subtype=file_subtype, filename=file_name)
-
-    protocol.sendmail(sender, receiver, msg)
+    msg.add_attachment(file_data, maintype='image', subtype=file_subtype, filename=file_name)
+    protocol.send_message(msg)
 
 
 with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
