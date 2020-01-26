@@ -35,7 +35,7 @@ def get_attachment_paths():
     return dir_list
 
 
-def sendmail(protocol, subject, body, sender, receiver, attachment_name, attachment_data, attachment_subtype):
+def sendmail(protocol, subject, body, sender, receiver, attachment_name, attachment_subtype):
     msg = EmailMessage()
     msg['Subject'] = subject
     msg['From'] = sender
@@ -43,11 +43,6 @@ def sendmail(protocol, subject, body, sender, receiver, attachment_name, attachm
     msg.set_content(body)
 
     attachment_maintype = mimetypes.guess_type(file_name)[0].split('/')[0]
-    # print('setting msg attachment name:', attachment_name)
-    # print('setting msg attachment data:', file_data)
-    # print('setting msg attachment maintype:', attachment_maintype)
-    # print('setting msg attachment subtype:', attachment_subtype)
-    print('\n')
     msg.add_attachment(file_data, maintype=attachment_maintype, subtype=attachment_subtype, filename=attachment_name)
     protocol.send_message(msg)
 
@@ -74,7 +69,7 @@ with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
             else:
                 print("file is ok, sending to mail")
                 sendmail(smtp, 'File transfer test' + str(counter), 'Some Generic Body',
-                         EMAIL_ADDRESS, EMAIL_ADDRESS, file_name, file_data, file_ext)
+                         EMAIL_ADDRESS, EMAIL_ADDRESS, file_name, file_ext)
                 counter = counter + 1
 
     smtp.quit()
