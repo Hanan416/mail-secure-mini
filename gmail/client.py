@@ -38,9 +38,16 @@ def sendmail(protocol, subject, body, sender, receiver, attachment_name, attachm
     msg['To'] = receiver
     msg.set_content(body)
 
-    attachment_maintype = mimetypes.guess_type(file_name)[0].split('/')[0]
+    attachment_maintype = mimetypes.guess_type(attachment_name, strict=True)[0]
+    if attachment_maintype is None and attachment_name.find('.rar'):
+        attachment_maintype = 'application/octet-stream'
+    elif attachment_maintype is None:
+        print('Unknown file type, not sending:', attachment_name)
+        return False
+
     msg.add_attachment(file_data, maintype=attachment_maintype, subtype=attachment_subtype, filename=attachment_name)
     protocol.send_message(msg)
+    return True
 
 
 with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
@@ -63,10 +70,9 @@ with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
                       'not sending..\n')
                 file.close()
             else:
-                print('file is ok, sending to mail\n')
-                sendmail(smtp, 'File transfer test' + str(counter), 'Some Generic Body',
-                         EMAIL_ADDRESS, EMAIL_ADDRESS, file_name, file_ext)
-                counter = counter + 1
+                if sendmail(smtp, 'File transfer test' + str(counter), 'Some Generic Body', EMAIL_ADDRESS, EMAIL_ADDRESS, file_name, file_ext):
+                    counter = counter + 1
+                    print('file:', file_name, 'is ok, sent to mail\n')
     print('initial file amount:', (len(list_of_files)),
           '\ntotal filtered:', (len(list_of_files) - counter + 1),
           '\ntotal sent:', counter - 1)
