@@ -16,14 +16,10 @@ def attach_virus(f):
     buf = f.read()
     hash_code.update(buf)
     hex_ret = hash_code.hexdigest()
-    print("initial hex_ret", hex_ret)
     rand = random.random()
-    print("rand =", rand)
     if rand <= 0.4:
         rand_ind = round(random.random() * (len(KNOWN_VIRUSES)-1))
-        print("rand_ind =", rand_ind)
         hex_ret = hash_code.hexdigest() + KNOWN_VIRUSES[rand_ind]
-        print("buf infected, hex_ret", hex_ret)
 
     return hex_ret, buf
 
@@ -31,7 +27,7 @@ def attach_virus(f):
 def get_attachment_paths():
     os.chdir(os.getcwd() + ATTACHMENTS_FOLDER)
     dir_list = os.listdir()
-    print("dir list:\n", dir_list)
+    print('dir list:', dir_list, '\n')
     return dir_list
 
 
@@ -56,7 +52,7 @@ with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
     list_of_files = get_attachment_paths()
     counter = 1
     for file_name in list_of_files:
-        print("working on file:", file_name)
+        print('working on file:', file_name)
         with open(file_name, 'rb') as file:
             file_ext = os.path.splitext(file_name)[1]
             hex_val, file_data = attach_virus(file)
@@ -64,12 +60,14 @@ with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
             if any(virus in str(hex_val) for virus in KNOWN_VIRUSES):
                 print('!!!! ALERT !!!!!\n'
                       'a virus was found in file', file_name,'\n'
-                      'not sending..\n\n')
+                      'not sending..\n')
                 file.close()
             else:
-                print("file is ok, sending to mail")
+                print('file is ok, sending to mail\n')
                 sendmail(smtp, 'File transfer test' + str(counter), 'Some Generic Body',
                          EMAIL_ADDRESS, EMAIL_ADDRESS, file_name, file_ext)
                 counter = counter + 1
-
+    print('initial file amount:', (len(list_of_files)),
+          '\ntotal filtered:', (len(list_of_files) - counter + 1),
+          '\ntotal sent:', counter - 1)
     smtp.quit()
